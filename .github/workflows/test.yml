@@ -127,12 +127,7 @@ jobs:
                   },
                   {
                     "id": "pmd",
-<<<<<<< HEAD
                     "name": "PMD"
-=======
-                    "name": "PMD",
-                    "pattern": "**/pmd/*.xml"
->>>>>>> e418fe204ceddf25f4bf0fae71ae728739594d57
                   }
                 ],
                 "errorImpact": -1,
@@ -148,12 +143,7 @@ jobs:
                 "tools": [
                   {
                     "id": "spotbugs",
-<<<<<<< HEAD
                     "name": "SpotBugs"
-=======
-                    "name": "SpotBugs",
-                    "pattern": "**/spotbugs/*.xml"
->>>>>>> e418fe204ceddf25f4bf0fae71ae728739594d57
                   }
                 ],
                 "errorImpact": -3,
@@ -175,12 +165,7 @@ jobs:
                   {
                     "id": "jacoco",
                     "name": "Branch Coverage",
-<<<<<<< HEAD
                     "metric": "branch"
-=======
-                    "metric": "branch",
-                    "pattern": "**/jacocoTestReport.xml"
->>>>>>> e418fe204ceddf25f4bf0fae71ae728739594d57
                   }
                 ],
                 "maxScore": 100,
