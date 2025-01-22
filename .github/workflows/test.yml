@@ -130,7 +130,7 @@ jobs:
                   {
                     "id": "pmd",
                     "name": "PMD",
-                    "pattern": **/pmd/*.xml"
+                    "pattern": "**/pmd/*.xml"
                   }
                 ],
                 "errorImpact": -1,
