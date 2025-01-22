@@ -109,7 +109,7 @@ jobs:
                 {
                   "id": "test",
                   "name": "Tests",                              
-                  "pattern": "${{ github.workspace }}/build/test-results/**/*.xml"
+                  "pattern": "**/TEST-*.xml"
                 }
               ],
               "passedImpact": 0,
@@ -125,12 +125,12 @@ jobs:
                   {
                     "id": "checkstyle",
                     "name": "CheckStyle",
-                    "pattern": "${{ github.workspace }}/build/reports/checkstyle/main.xml"
+                    "pattern": "**/checkstyle/*.xml"
                   },
                   {
                     "id": "pmd",
                     "name": "PMD",
-                    "pattern": "${{ github.workspace }}/build/reports/pmd/main.xml"
+                    "pattern": **/pmd/*.xml"
                   }
                 ],
                 "errorImpact": -1,
@@ -148,7 +148,7 @@ jobs:
                     "id": "spotbugs",
                     "name": "SpotBugs",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/spotbugs/main.xml"
+                    "pattern": "**/spotbugs/*.xml"
                   }
                 ],
                 "errorImpact": -3,
@@ -167,14 +167,14 @@ jobs:
                     "name": "Line Coverage",
                     "metric": "line",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/jacoco/jacocoTestReport.xml"
+                    "pattern": "**/jacocoTestReport.xml"
                   },
                   {
                     "id": "jacoco",
                     "name": "Branch Coverage",
                     "metric": "branch",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/jacoco/jacocoTestReport.xml"
+                    "pattern": "**/jacocoTestReport.xml"
                   }
                 ],
                 "maxScore": 100,
