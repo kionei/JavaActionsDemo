@@ -126,7 +126,15 @@ jobs:
       id: metrics
       run: |
         cat metrics.env >> "${GITHUB_OUTPUT}"
-        mkdir -p badges
+        mkdir -p .github/badges
+
+    - name: Generate the badge SVG image for tests
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Line coverage'
+        status: ${{ steps.metrics.outputs.tests }}%
+        color: 'green'
+        path: .github/badges/tests.svg
 
     - name: Generate the badge SVG image for the line coverage
       uses: emibcn/badge-action@v2.0.2
@@ -134,7 +142,7 @@ jobs:
         label: 'Line coverage'
         status: ${{ steps.metrics.outputs.line }}%
         color: 'green'
-        path: badges/line-coverage.svg
+        path: .github/badges/line-coverage.svg
 
     - name: Generate the badge SVG image for the branch coverage
       uses: emibcn/badge-action@v2.0.2
@@ -142,7 +150,7 @@ jobs:
         label: 'Branch coverage'
         status: ${{ steps.metrics.outputs.branch }}%
         color: 'green'
-        path: badges/branch-coverage.svg
+        path: .github/badges/branch-coverage.svg
 
     - name: Generate the badge SVG image for the style warnings
       uses: emibcn/badge-action@v2.0.2
@@ -150,7 +158,7 @@ jobs:
         label: 'Style warnings'
         status: ${{ steps.metrics.outputs.style }}
         color: 'orange'
-        path: badges/style-warnings.svg
+        path: .github/badges/style-warnings.svg
 
     - name: Generate the badge SVG image for the potential bugs
       uses: emibcn/badge-action@v2.0.2
@@ -158,14 +166,14 @@ jobs:
         label: 'Potential Bugs'
         status: ${{ steps.metrics.outputs.bugs }}
         color: 'red'
-        path: badges/bugs.svg
+        path: .github/badges/bugs.svg
 
     - name: Commit updated badges
       continue-on-error: true
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add badges/*.svg
+        git add .github/badges/*.svg
         git commit -m "Update badges with results from latest autograding" || true
 
     - name: Push updated badges to GitHub repository
