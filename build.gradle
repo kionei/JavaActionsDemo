@@ -50,7 +50,7 @@ jacocoTestReport {
 }
 
 checkstyle {
-    toolVersion = "10.12.4"
+    toolVersion = "10.21.1"
 }
 
 tasks.withType(Checkstyle) {
@@ -67,5 +67,13 @@ pmd {
 }
 
 spotbugs {
-  toolVersion = '4.9.0'
+    toolVersion = '4.9.0'
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+  reports {
+    xml {
+      enabled = true
+    }
+  }
 }

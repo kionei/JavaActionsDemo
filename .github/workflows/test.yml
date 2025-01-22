@@ -90,7 +90,7 @@ jobs:
     - name: Extract pull request number # (commenting on the pull request requires the PR number)
       uses: jwalton/gh-find-current-pr@v1
       id: pr
-    
+
     - name: Run Autograding
       uses: uhafner/autograding-github-action@v3
       with:
@@ -105,7 +105,7 @@ jobs:
                 {
                   "id": "test",
                   "name": "Tests",
-                  "pattern": "${{ github.workspace }}/**/build/*-reports/TEST*.xml"
+                  "pattern": "${{ github.workspace }}/**/build/*-reports/test/TEST*.xml"
                 }
               ],
               "passedImpact": 0,
@@ -121,12 +121,12 @@ jobs:
                   {
                     "id": "checkstyle",
                     "name": "CheckStyle",
-                    "pattern": "${{ github.workspace }}/**/build/**checkstyle-result.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/checkstyle/**.xml"
                   },
                   {
                     "id": "pmd",
                     "name": "PMD",
-                    "pattern": "${{ github.workspace }}/**/build/**pmd.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/pmd/**.xml"
                   }
                 ],
                 "errorImpact": -1,
@@ -144,7 +144,7 @@ jobs:
                     "id": "spotbugs",
                     "name": "SpotBugs",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/**/build/spotbugsXml.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/spotbugs/**.xml"
                   }
                 ],
                 "errorImpact": -3,
@@ -163,14 +163,14 @@ jobs:
                     "name": "Line Coverage",
                     "metric": "line",
                     "sourcePath": "src/main/java",
-                    "pattern": "build/reports/jacoco/test/jacoco.xml"
+                    "pattern": "build/reports/jacoco/**/jacocoTestReport.xml"
                   },
                   {
                     "id": "jacoco",
                     "name": "Branch Coverage",
                     "metric": "branch",
                     "sourcePath": "src/main/java",
-                    "pattern": "build/reports/jacoco/test/jacoco.xml"
+                    "pattern": "build/reports/jacoco/**/jacocoTestReport.xml"
                   }
                 ],
                 "maxScore": 100,
