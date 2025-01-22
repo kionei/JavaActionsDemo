@@ -36,6 +36,11 @@ tasks.named('test') {
 	useJUnitPlatform()
 	reports {
 		junitXml.required = true
-		csv.required.set(true)
+	}
+}
+
+jacocoTestReport {
+	reports {
+		csv.required = true
 	}
 }
