@@ -108,7 +108,8 @@ jobs:
               "tools": [
                 {
                   "id": "test",
-                  "name": "Tests"
+                  "name": "Tests",
+                  "pattern": "**/build/test-results/test/TEST-*.xml"
                 }
               ],
               "passedImpact": 0,
@@ -123,11 +124,13 @@ jobs:
                 "tools": [
                   {
                     "id": "checkstyle",
-                    "name": "CheckStyle"
+                    "name": "CheckStyle",
+                    "pattern": "**/build/reports/checkstyle/*.xml"
                   },
                   {
                     "id": "pmd",
-                    "name": "PMD"
+                    "name": "PMD",
+                    "pattern": "**/build/reports/pmd/*.xml"
                   }
                 ],
                 "errorImpact": -1,
@@ -143,7 +146,8 @@ jobs:
                 "tools": [
                   {
                     "id": "spotbugs",
-                    "name": "SpotBugs"
+                    "name": "SpotBugs",
+                    "pattern": "**/build/reports/spotbugs/*.xml"
                   }
                 ],
                 "errorImpact": -3,
@@ -160,12 +164,14 @@ jobs:
                   {
                     "id": "jacoco",
                     "name": "Line Coverage",
-                    "metric": "line"
+                    "metric": "line",
+                    "pattern": "**/build/reports/jacoco/jacoco.xml"
                   },
                   {
                     "id": "jacoco",
                     "name": "Branch Coverage",
-                    "metric": "branch"
+                    "metric": "branch",
+                    "pattern": "**/build/reports/jacoco/jacoco.xml"
                   }
                 ],
                 "maxScore": 100,
