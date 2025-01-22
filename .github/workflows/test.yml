@@ -147,7 +147,6 @@ jobs:
                   {
                     "id": "spotbugs",
                     "name": "SpotBugs",
-                    "sourcePath": "src/main/java",
                     "pattern": "**/spotbugs/*.xml"
                   }
                 ],
@@ -173,7 +172,6 @@ jobs:
                     "id": "jacoco",
                     "name": "Branch Coverage",
                     "metric": "branch",
-                    "sourcePath": "src/main/java",
                     "pattern": "**/jacocoTestReport.xml"
                   }
                 ],
