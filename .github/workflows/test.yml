@@ -104,8 +104,8 @@ jobs:
               "tools": [
                 {
                   "id": "test",
-                  "name": "Tests",
-                  "pattern": "${{ github.workspace }}/build/test-results/test/TEST*.xml"
+                  "name": "Tests",                              
+                  "pattern": "${{ github.workspace }}/**/build/test-results/**/*.xml"
                 }
               ],
               "passedImpact": 0,
@@ -121,12 +121,12 @@ jobs:
                   {
                     "id": "checkstyle",
                     "name": "CheckStyle",
-                    "pattern": "${{ github.workspace }}/build/reports/checkstyle/main.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/checkstyle/main.xml"
                   },
                   {
                     "id": "pmd",
                     "name": "PMD",
-                    "pattern": "${{ github.workspace }}/build/reports/pmd/main.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/pmd/main.xml"
                   }
                 ],
                 "errorImpact": -1,
@@ -144,7 +144,7 @@ jobs:
                     "id": "spotbugs",
                     "name": "SpotBugs",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/spotbugs/main.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/spotbugs/main.xml"
                   }
                 ],
                 "errorImpact": -3,
@@ -163,14 +163,14 @@ jobs:
                     "name": "Line Coverage",
                     "metric": "line",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/jacoco/jacocoTestReport.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/jacoco/jacocoTestReport.xml"
                   },
                   {
                     "id": "jacoco",
                     "name": "Branch Coverage",
                     "metric": "branch",
                     "sourcePath": "src/main/java",
-                    "pattern": "${{ github.workspace }}/build/reports/jacoco/jacocoTestReport.xml"
+                    "pattern": "${{ github.workspace }}/**/build/reports/jacoco/jacocoTestReport.xml"
                   }
                 ],
                 "maxScore": 100,
