@@ -28,6 +28,10 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew test checkstyleMain pmdMain spotbugsMain
 
+    - name: Find xml files
+      run: |
+        find ${{ github.workspace }} -name *.xml
+
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
       id: test-results
