@@ -28,69 +28,6 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew test checkstyleMain pmdMain spotbugsMain
 
-    - name: Find xml files
-      run: |
-        find ${{ github.workspace }} -name *.xml
-
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      id: test-results
-      if: always()
-      with:
-        files: "${{ github.workspace }}/**/build/test-results/**/*.xml"
-
-    - name: Set badge color
-      shell: bash
-      run: |
-        case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
-          success)
-            echo "BADGE_COLOR=31c653" >> $GITHUB_ENV
-            ;;
-          failure)
-            echo "BADGE_COLOR=800000" >> $GITHUB_ENV
-            ;;
-          neutral)
-            echo "BADGE_COLOR=696969" >> $GITHUB_ENV
-            ;;
-        esac
-
-    - name: Create test badge
-      uses: emibcn/badge-action@808173dd03e2f30c980d03ee49e181626088eee8
-      with:
-        label: Tests
-        status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs: ${{ fromJSON( steps.test-results.outputs.json ).conclusion }}'
-        color: ${{ env.BADGE_COLOR }}
-        path: .github/badges/test.svg
-
-    - name: Add coverage to PR
-      id: jacoco
-      uses: madrapps/jacoco-report@v1.7.1
-      with:
-        paths: |
-          ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
-        token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 40
-        min-coverage-changed-files: 60
-
-    - name: Generate JaCoCo Badge
-      id: jacoco-badge
-      uses: cicirello/jacoco-badge-generator@v2
-      with:
-        generate-branches-badge: true
-        jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
-
-    - name: Log coverage percentage
-      run: |
-        echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
-        echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
-
-    - name: Commit and push the badges (if it changed)
-      uses: EndBug/add-and-commit@v7
-      with:
-        default_author: github_actions
-        message: 'commit badges'
-        add: '*.svg'
-
     - name: Extract pull request number # (commenting on the pull request requires the PR number)
       uses: jwalton/gh-find-current-pr@v1
       id: pr
@@ -179,3 +116,56 @@ jobs:
               }
             ]
           }
+
+    - name: Write metrics to GitHub output
+      id: metrics
+      run: |
+        cat metrics.env >> "${GITHUB_OUTPUT}"
+        mkdir -p badges
+
+    - name: Generate the badge SVG image for the line coverage
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Line coverage'
+        status: ${{ steps.metrics.outputs.line }}%
+        color: 'green'
+        path: badges/line-coverage.svg
+
+    - name: Generate the badge SVG image for the branch coverage
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Branch coverage'
+        status: ${{ steps.metrics.outputs.branch }}%
+        color: 'green'
+        path: badges/branch-coverage.svg
+
+    - name: Generate the badge SVG image for the style warnings
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Style warnings'
+        status: ${{ steps.metrics.outputs.style }}
+        color: 'orange'
+        path: badges/style-warnings.svg
+
+    - name: Generate the badge SVG image for the potential bugs
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Potential Bugs'
+        status: ${{ steps.metrics.outputs.bugs }}
+        color: 'red'
+        path: badges/bugs.svg
+
+    - name: Commit updated badges
+      continue-on-error: true
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add badges/*.svg
+        git commit -m "Update badges with results from latest autograding" || true
+
+    - name: Push updated badges to GitHub repository
+      uses: ad-m/github-push-action@master
+      if: ${{ success() }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
