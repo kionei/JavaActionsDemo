@@ -7,10 +7,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      checks: write
+      id-token: write
+      pull-requests: write
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+        fetch-depth: 0
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -23,21 +31,153 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew test
+      run: ./gradlew test checkstyleMain pmdMain spotbugsMain
 
-    - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v5
-      if: success() || failure() # always run even if the previous step fails
-      with:
-        report_paths: '**/build/test-results/test/TEST-*.xml'
+    - name: Extract pull request number # (commenting on the pull request requires the PR number)
+      uses: jwalton/gh-find-current-pr@v1
+      id: pr
 
-    - name: Add coverage to PR
-      id: jacoco
-      uses: madrapps/jacoco-report@v1.7.1
+    - name: Run Autograding
+      uses: uhafner/autograding-github-action@v3
       with:
-        paths: |
-          ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
-          ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-        token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 40
-        min-coverage-changed-files: 60
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        pr-number: ${{ steps.pr.outputs.number }}
+        checks-name: "Autograding GitHub Action"
+        config: > # Override default configuration: just grade the test results
+          {
+            "tests": {
+              "name": "Tests",
+              "tools": [
+                {
+                  "id": "test",
+                  "name": "Tests",
+                  "pattern": "**/build/test-results/test/TEST-*.xml"
+                }
+              ],
+              "passedImpact": 0,
+              "skippedImpact": -1,
+              "failureImpact": -5,
+              "maxScore": 100
+            },
+            "analysis": [
+              {
+                "name": "Style",
+                "id": "style",
+                "tools": [
+                  {
+                    "id": "checkstyle",
+                    "name": "CheckStyle",
+                    "pattern": "**/build/reports/checkstyle/*.xml"
+                  },
+                  {
+                    "id": "pmd",
+                    "name": "PMD",
+                    "pattern": "**/build/reports/pmd/*.xml"
+                  }
+                ],
+                "errorImpact": -1,
+                "highImpact": -1,
+                "normalImpact": -1,
+                "lowImpact": -1,
+                "maxScore": 100
+              },
+              {
+                "name": "Bugs",
+                "id": "bugs",
+                "icon": "bug",
+                "tools": [
+                  {
+                    "id": "spotbugs",
+                    "name": "SpotBugs",
+                    "pattern": "**/build/reports/spotbugs/*.xml"
+                  }
+                ],
+                "errorImpact": -3,
+                "highImpact": -3,
+                "normalImpact": -3,
+                "lowImpact": -3,
+                "maxScore": 100
+              }
+            ],
+            "coverage": [
+              {
+                "name": "Code Coverage",
+                "tools": [
+                  {
+                    "id": "jacoco",
+                    "name": "Line Coverage",
+                    "metric": "line",
+                    "pattern": "**/build/reports/jacoco/jacoco.xml"
+                  },
+                  {
+                    "id": "jacoco",
+                    "name": "Branch Coverage",
+                    "metric": "branch",
+                    "pattern": "**/build/reports/jacoco/jacoco.xml"
+                  }
+                ],
+                "maxScore": 100,
+                "missedPercentageImpact": -1
+              }
+            ]
+          }
+
+    - name: Write metrics to GitHub output
+      id: metrics
+      run: |
+        cat metrics.env >> "${GITHUB_OUTPUT}"
+        mkdir -p .github/badges
+
+    - name: Generate the badge SVG image for tests
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Line coverage'
+        status: ${{ steps.metrics.outputs.tests }}%
+        color: 'green'
+        path: .github/badges/tests.svg
+
+    - name: Generate the badge SVG image for the line coverage
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Line coverage'
+        status: ${{ steps.metrics.outputs.line }}%
+        color: 'green'
+        path: .github/badges/line-coverage.svg
+
+    - name: Generate the badge SVG image for the branch coverage
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Branch coverage'
+        status: ${{ steps.metrics.outputs.branch }}%
+        color: 'green'
+        path: .github/badges/branch-coverage.svg
+
+    - name: Generate the badge SVG image for the style warnings
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Style warnings'
+        status: ${{ steps.metrics.outputs.style }}
+        color: 'orange'
+        path: .github/badges/style-warnings.svg
+
+    - name: Generate the badge SVG image for the potential bugs
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Potential Bugs'
+        status: ${{ steps.metrics.outputs.bugs }}
+        color: 'red'
+        path: .github/badges/bugs.svg
+
+    - name: Commit updated badges
+      continue-on-error: true
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add .github/badges/*.svg
+        git commit -m "Update badges with results from latest autograding" || true
+
+    - name: Push updated badges to GitHub repository
+      uses: ad-m/github-push-action@master
+      if: ${{ success() }}
+      with:
+        branch: ${{ github.head_ref }}

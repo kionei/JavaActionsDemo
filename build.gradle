@@ -2,6 +2,10 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id 'checkstyle'
+	id 'pmd'
+	id 'com.github.spotbugs' version '6.1.2'
 }
 
 group = 'net.shazam'
@@ -33,4 +37,46 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	reports {
+		junitXml.required = true
+	}
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		xml.destination = file("build/reports/jacoco/jacoco.xml")
+		csv.required = true
+	}
+}
+
+checkstyle {
+    toolVersion = "10.21.1"
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = true
+    }
+}
+
+pmd {
+    consoleOutput = true
+    toolVersion = "7.0.0"
+    rulesMinimumPriority = 5
+    ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+}
+
+spotbugs {
+    toolVersion = '4.9.0'
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+  reports {
+    xml {
+      enabled = true
+    }
+  }
 }
